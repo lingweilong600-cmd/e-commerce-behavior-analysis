@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  说明：让 Windows 上的 PySpark 连上集群的 Hive 元数据（MySQL）。
+  没有这个文件，enableHiveSupport() 会用本地 Derby 元数据，
+  建的表集群里的 Hive / beeline 看不到，也不是存在 HDFS 上。
+
+  放置位置（任选其一）：
+    1) 复制到 Spark 的 conf 目录（推荐）
+       - 完整安装的 Spark：放到 %SPARK_HOME%\conf\ 下
+       - pip 安装的 pyspark：设置环境变量 SPARK_CONF_DIR 指向本文件所在目录
+    2) 最快验证法：直接把集群上 Hive 的 hive-site.xml 拷过来用（最不容易配错）
+
+  两种连元数据的方式，按你集群实际配置二选一（见下方注释）。
+-->
+<configuration>
+
+  <!-- 数仓在 HDFS 上的根目录 -->
+  <property>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>hdfs://node1:8020/user/hive/warehouse</value>
+  </property>
+
+  <!-- ============================================================
+       方式 A：远程元数据服务（推荐）
+       Hive metastore 以服务方式跑在 node1 的 9083 端口时用。
+       Spark 只连这个服务，不用自己连 MySQL。
+       下面这段默认启用；若你用的是方式 B，请删除下面这段。
+       ============================================================ -->
+  <property>
+    <name>hive.metastore.uris</name>
+    <value>thrift://node1:9083</value>
+  </property>
+
+  <!-- ============================================================
+       方式 B：直连 MySQL（默认注释，用的时候取消注释）
+       集群没单独起 metastore 服务时用。
+       需要额外把 mysql-connector-java.jar 放到 Spark 的 jars 目录。
+       ============================================================ -->
+  <!--
+  <property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:mysql://node1:3306/hive?createDatabaseIfNotExist=true&amp;useSSL=false</value>
+  </property>
+  <property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <value>com.mysql.jdbc.Driver</value>
+  </property>
+  <property>
+    <name>javax.jdo.option.ConnectionUserName</name>
+    <value>root</value>
+  </property>
+  <property>
+    <name>javax.jdo.option.ConnectionPassword</name>
+    <value>你的MySQL密码</value>
+  </property>
+  -->
+
+</configuration>

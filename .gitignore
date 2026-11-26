@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+
+# Spark / Hive 本地运行产物
+spark-warehouse/
+metastore_db/
+derby.log
+
+# 原始数据（体积大，不上传）
+data/
+*.csv
